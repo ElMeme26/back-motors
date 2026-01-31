@@ -54,7 +54,6 @@ app.post("/vehiculos", (req, res) => {
 
     if (!nuevoVehiculo || Object.keys(nuevoVehiculo).length === 0) {
         return res.status(400).send("No es posible registrar un vehículo sin información")
-        
     }
 
     // Función para evitar ingresar carros duplicados
@@ -75,6 +74,36 @@ app.post("/vehiculos", (req, res) => {
 
     vehiculos.push(nuevoVehiculo)
     res.status(201).json(nuevoVehiculo)
+})
+
+app.put("/vehiculos/:placas", (req, res) => {
+    const placas = req.params.placas
+    const datosActualizados = req.body
+
+    if (!datosActualizados || Object.keys(datosActualizados).length === 0) {
+        return res.status(400).send("No es posible actualizar un vehículo sin información")
+    }
+
+    const id = vehiculos.findIndex(v => v.placas === placas)
+
+    if (id === -1) {
+        return res.status(404).send("Vehículo no encontrado")
+    }
+
+    if (datosActualizados.placas && datosActualizados.placas !== placas) {
+        const placasExistentes = vehiculos.some(v => v.placas === datosActualizados.placas)
+
+        if (placasExistentes) {
+            return res.status(409).send("No es posible actualizar a unas placas que ya existen")
+        }
+    }
+
+    vehiculos[id] = { 
+        ...vehiculos[id], 
+        ...datosActualizados 
+    }
+
+    res.status(200).json(vehiculos[id])
 })
 
 
