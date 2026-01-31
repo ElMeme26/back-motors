@@ -49,6 +49,34 @@ app.get("/vehiculos/:placas", (req, res) => {
     
 })
 
+app.post("/vehiculos", (req, res) => {
+    const nuevoVehiculo = req.body
+
+    if (!nuevoVehiculo || Object.keys(nuevoVehiculo).length === 0) {
+        return res.status(400).send("No es posible registrar un vehículo sin información")
+        
+    }
+
+    // Función para evitar ingresar carros duplicados
+    const placas = nuevoVehiculo.placas
+    const vehiculoExistente = vehiculos.find(v => v.placas === placas)
+
+    if (vehiculoExistente) {
+        return res.status(409).send("No es posible registrar un vehículo con las mismas placas")
+    }
+
+    if (Array.isArray(nuevoVehiculo)) {
+        nuevoVehiculo.forEach(vehiculo => {
+            vehiculos.push(vehiculo)
+        })
+        return res.status(201).json(nuevoVehiculo)
+        
+    }
+
+    vehiculos.push(nuevoVehiculo)
+    res.status(201).json(nuevoVehiculo)
+})
+
 
 app.listen(PORT, () => {
     console.log(`Servidor activo en http://localhost:${PORT}`)
