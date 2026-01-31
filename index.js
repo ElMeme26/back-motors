@@ -106,6 +106,18 @@ app.put("/vehiculos/:placas", (req, res) => {
     res.status(200).json(vehiculos[id])
 })
 
+app.delete("/vehiculos/:placas", (req, res) => {
+    const placas = req.params.placas
+    const id = vehiculos.findIndex(v => v.placas === placas)
+
+    if (id === -1) {
+        return res.status(404).send("Vehículo no encontrado")
+    }
+
+    vehiculos.splice(id, 1)
+    res.status(200).send("Vehículo eliminado correctamente")
+})
+
 
 app.listen(PORT, () => {
     console.log(`Servidor activo en http://localhost:${PORT}`)
