@@ -34,10 +34,20 @@ class VehiculosRepository {
         return result.rows[0];
     }
 
-    async update(data) {
+    async update(placasOriginal, data) {
         const result = await pool.query(
-            'UPDATE vehiculos SET marca = coalesce($1, marca), modelo = coalesce($2, modelo), anio = coalesce($3, anio), placas = coalesce($4, placas), dueno = coalesce($5, dueno), estado = ($6, estado), motivo = coalesce($7, motivo), activo = ($8, activo) WHERE placas = $9 returning id, marca, modelo, anio, placas, dueno, estado, motivo, activo, fecha_ingreso;',
-            [data.marca ?? data.modelo ?? data.anio ?? data.placas ?? data.dueno ?? data.estado ?? data.motivo ?? data.activo]
+            'UPDATE vehiculos SET marca = coalesce($1, marca), modelo = coalesce($2, modelo), anio = coalesce($3, anio), placas = coalesce($4, placas), dueno = coalesce($5, dueno), estado = coalesce($6, estado), motivo = coalesce($7, motivo), activo = coalesce($8, activo) WHERE placas = $9 returning id, marca, modelo, anio, placas, dueno, estado, motivo, activo, fecha_ingreso;',
+            [
+                data.marca ?? null,
+                data.modelo ?? null,
+                data.anio ?? null,
+                data.placas ?? null,
+                data.dueno ?? null,
+                data.estado ?? null,
+                data.motivo ?? null,
+                data.activo ?? null,
+                placasOriginal
+            ]
         );
 
         return result.rows[0] || null;
