@@ -3,14 +3,62 @@ const { validarVehiculo } = require('../domain/vehiculos.rules');
 
 const repo = new VehiculosRepository();
 
+function parsePagination(query) {
+    const pageRaw = query.page ?? '1';
+    const limitRaw = query.limit ?? '10';
+
+    const page = Number(pageRaw);
+    const limit = Number(limitRaw);
+
+    if (!Number.isInteger(page) || page < 1) {
+        return { error: 'Parámetro "page" inválido (debe ser entero >= 1)' };
+    }
+
+    if (!Number.isInteger(limit) || limit < 1 || limit > 50) {
+        return { error: 'Parámetro "limit" inválido (debe ser entero entre 1 y 50)' };
+    }
+
+    return { page, limit, offset: (page - 1) * limit };
+}
+
 async function getAll(req, res) {
-    const vehiculos = await repo.getAll();
-    return res.json(vehiculos);
+    const pagination = parsePagination(req.query);
+    if (pagination.error) {
+        return res.status(400).json({ error: pagination.error });
+    }
+
+    const [data, total] = await Promise.all([
+        repo.getAllPaginated(pagination.offset, pagination.limit),
+        repo.getCountAll()
+    ]);
+
+    return res.json({
+        data,
+        total,
+        page: pagination.page,
+        limit: pagination.limit,
+        totalPages: Math.ceil(total / pagination.limit)
+    });
 }
 
 async function getAllActive(req, res) {
-    const vehiculos = await repo.getAllActive();
-    return res.json(vehiculos);
+    const pagination = parsePagination(req.query);
+    if (pagination.error) {
+        return res.status(400).json({ error: pagination.error });
+    }
+
+    const [data, total] = await Promise.all([
+        repo.getActivePaginated(pagination.offset, pagination.limit),
+        repo.getCountActive()
+    ]);
+
+    return res.json({
+        data,
+        total,
+        page: pagination.page,
+        limit: pagination.limit,
+        totalPages: Math.ceil(total / pagination.limit)
+    });
 }
 
 async function getByPlacas(req, res) {

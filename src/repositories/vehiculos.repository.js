@@ -2,6 +2,40 @@ const { pool } = require('../db');
 
 class VehiculosRepository {
 
+    async getCountAll() {
+        const result = await pool.query(
+            'SELECT COUNT(*)::int AS total FROM vehiculos;'
+        );
+
+        return result.rows[0]?.total ?? 0;
+    }
+
+    async getCountActive() {
+        const result = await pool.query(
+            'SELECT COUNT(*)::int AS total FROM vehiculos WHERE activo = true;'
+        );
+
+        return result.rows[0]?.total ?? 0;
+    }
+
+    async getAllPaginated(offset, limit) {
+        const result = await pool.query(
+            'SELECT id, marca, modelo, anio, dueno, placas, motivo, estado, fecha_ingreso FROM vehiculos ORDER BY fecha_ingreso DESC LIMIT $1 OFFSET $2;',
+            [limit, offset]
+        );
+
+        return result.rows;
+    }
+
+    async getActivePaginated(offset, limit) {
+        const result = await pool.query(
+            'SELECT id, marca, modelo, anio, dueno, placas, motivo, estado, fecha_ingreso FROM vehiculos WHERE activo = true ORDER BY fecha_ingreso DESC LIMIT $1 OFFSET $2;',
+            [limit, offset]
+        );
+
+        return result.rows;
+    }
+
     async getAll() {
         const result = await pool.query(
             'SELECT id, marca, modelo, anio, dueno, placas, motivo, estado, fecha_ingreso FROM vehiculos;'

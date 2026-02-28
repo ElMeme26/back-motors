@@ -2,9 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const { pool } = require('./src/db');
-const { sign, authMiddleware } = require('./src/auth');
+const { authMiddleware } = require('./src/auth');
 const { router: vehiculosRouter } = require('./src/routes/vehiculos.routes');
 const { router: usersRouter } = require('./src/routes/users.routes');
+const { router: nhtsaRouter } = require('./src/routes/nhtsa.routes');
 const { errorHandler } = require('./src/middlewares/error.middleware');
 
 const PORT = process.env.PORT || 3000;
@@ -52,15 +53,13 @@ app.use('/vehiculos', vehiculosRouter);
 
 app.use('/users', usersRouter);
 
-app.get('privado', authMiddleware, (req, res) => {
+app.use('/api-externa', nhtsaRouter);
+
+app.get('/privado', authMiddleware, (req, res) => {
     return res.json({
         ok: true,
         user: req.user
     });
-});
-
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`)
 });
 
 app.get('/health', async (req, res) => {
@@ -83,3 +82,7 @@ app.get('/health/db', async (req, res) => {
 })
 
 app.use(errorHandler);
+
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en el puerto ${PORT}`)
+});
