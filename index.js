@@ -13,8 +13,9 @@ const app = express();
 
 const allowed = [
     'http://localhost:3000',
-    'http://localhost:3001'
-];
+    'http://localhost:3001',
+    process.env.FRONT_URL
+].filter(Boolean);
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
@@ -33,8 +34,8 @@ app.use(cors({
         if (allowed.includes(origin)) {
             return cb(null, true);
         }
-        
-        return cb(new Error('CORS bloqueado' + origin));
+
+        return cb(new Error('CORS bloqueado ' + origin));
     }
 }));
 
